@@ -40,8 +40,8 @@ env:
   # https://github.com/travis-ci/travis-ci/issues/1946 and
   # https://github.com/angular/angular.js/issues/5596 for more information.
   global:
-    - SAUCE_USERNAME=deltadb-common-utils
-    - SAUCE_ACCESS_KEY=5aa00b81-3d7f-4e7a-ba63-424c5360316d
+    - SAUCE_USERNAME=deltadb-orm-nosql-u
+    - SAUCE_ACCESS_KEY=6d3b9404-c3b5-4436-a377-f3d5fa3062c4
 
 branches:
   only:
