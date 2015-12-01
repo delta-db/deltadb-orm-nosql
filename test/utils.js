@@ -2,6 +2,8 @@
 
 var Utils = function () {};
 
+Utils.prototype.TIMEOUT_MS = 4000;
+
 // TODO: still needed? Move to test-utils in deltadb-common-utils?
 // The order of the attributes appears to be an issue of concern in browsers so we cannot just
 // use .eql(). TODO: is there a better way, native to chai?
