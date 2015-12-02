@@ -46,9 +46,15 @@ var build = (process.env.TRAVIS_COMMIT ? process.env.TRAVIS_COMMIT : Date.now())
 if (client.runner === 'saucelabs') {
   qs.saucelabs = true;
 }
+
 if (process.env.GREP) {
   qs.grep = process.env.GREP;
 }
+
+if (process.env.NOINDEXEDDB) {
+  qs.noindexeddb = process.env.NOINDEXEDDB;
+}
+
 testUrl += '?';
 testUrl += querystring.stringify(qs);
 
