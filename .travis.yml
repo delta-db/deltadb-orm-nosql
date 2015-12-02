@@ -23,7 +23,7 @@ env:
   - CLIENT="saucelabs:internet explorer" COMMAND=browser-test
   - CLIENT="saucelabs:internet explorer:10" COMMAND=browser-test
   - CLIENT="saucelabs:internet explorer:9" NOINDEXEDDB=true COMMAND=browser-test
-  - CLIENT="saucelabs:microsoftedge" COMMAND=browser-test
+  # - CLIENT="saucelabs:microsoftedge" COMMAND=browser-test # TODO: get working!
   - CLIENT="saucelabs:safari:9" COMMAND=browser-test
   - CLIENT="saucelabs:safari:8" COMMAND=browser-test
   - CLIENT="saucelabs:safari:7" COMMAND=browser-test

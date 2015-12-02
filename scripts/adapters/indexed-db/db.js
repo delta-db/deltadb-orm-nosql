@@ -54,10 +54,13 @@ var DB = function () {
 
 inherits(DB, CommonDB);
 
+// TODO: use browser detection to set to 0 when not Safari or IE
 // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a little
 // bit before destroying/opening the DB to make sure that we don't get any blocking errors from
 // transactions that have yet to complete.
-DB._SLEEP_MS = 300;
+// DB._SLEEP_MS = 2000; // Edge - NOT WORKING
+DB._SLEEP_MS = 700; // IE
+// DB._SLEEP_MS = 300; // Safari
 
 DB.prototype._setDB = function (request) {
   this._db = request.result;
@@ -340,22 +343,6 @@ DB.prototype.destroy = function () {
     });
   });
 };
-//
-// DB.prototype.destroy = function () {
-//   var self = this;
-//   // We wait for the store to be loaded before closing the store as we wait for this same event when
-//   // creating a store and we don't want to try to close a store before we have opened it.
-//   return self._loaded.then(function () {
-//     return self._openClose(function () {
-//       // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a
-//       // little bit before destroying the DB to make sure that we don't get any blocking errors from
-//       // transactions that have yet to complete.
-//       return utils.timeout(DB._SLEEP_MS).then(function () {
-//         return self._closeDestroyUnregister();
-//       });
-//     });
-//   });
-// };
 
 DB.prototype._closeDBAndDestroyCol = function (colName) {
   // Handle the destroying at the DB layer as we need to first close and then reopen the DB before
