@@ -24,7 +24,8 @@ Utils.prototype.eql = function (exp, act) {
     }
   }
   if (isString || empty) {
-    act.should.eql(exp);
+    (act === exp).should.eql(true);
+    // act.should.eql(exp); // Doesn't work in IE 9
   }
 };
 
