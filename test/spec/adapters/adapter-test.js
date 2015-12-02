@@ -201,7 +201,8 @@ Adapter.prototype.test = function () {
         });
       }).then(function () {
         // Make sure that all loop only executed max times
-        n.should.eql(max);
+        // n.should.eql(max); // Doesn't work in IE 9
+        (n === max).should.eql(true);
       });
     });
 
