@@ -2,7 +2,7 @@
 
 var Utils = function () {};
 
-Utils.prototype.TIMEOUT_MS = 10000;
+Utils.prototype.TIMEOUT_MS = 20000;
 
 // TODO: still needed? Move to test-utils in deltadb-common-utils?
 // The order of the attributes appears to be an issue of concern in browsers so we cannot just
