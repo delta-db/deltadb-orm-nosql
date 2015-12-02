@@ -23,11 +23,11 @@ var sauceResultsUpdater = new SauceResultsUpdater(username, accessKey);
 
 // process.env.CLIENT is a colon seperated list of
 // (saucelabs|selenium):browserName:browserVerion:platform
-var clientStr = process.env.CLIENT || 'selenium:firefox';
+var clientStr = process.env.CLIENT || 'selenium:phantomjs';
 var tmp = clientStr.split(':');
 var client = {
   runner: tmp[0] || 'selenium',
-  browser: tmp[1] || 'firefox',
+  browser: tmp[1] || 'phantomjs',
   version: tmp[2] || null, // Latest
   platform: tmp[3] || null
 };
@@ -46,9 +46,15 @@ var build = (process.env.TRAVIS_COMMIT ? process.env.TRAVIS_COMMIT : Date.now())
 if (client.runner === 'saucelabs') {
   qs.saucelabs = true;
 }
+
 if (process.env.GREP) {
   qs.grep = process.env.GREP;
 }
+
+if (process.env.NOINDEXEDDB) {
+  qs.noindexeddb = process.env.NOINDEXEDDB;
+}
+
 testUrl += '?';
 testUrl += querystring.stringify(qs);
 
@@ -61,9 +67,13 @@ function testError(e) {
 
 function postResult(result) {
   var failed = !process.env.PERF && result.failed;
-  sauceResultsUpdater.setPassed(jobName, build, !failed).then(function () {
+  if (client.runner === 'saucelabs') {
+    sauceResultsUpdater.setPassed(jobName, build, !failed).then(function () {
+      process.exit(failed ? 1 : 0);
+    });
+  } else {
     process.exit(failed ? 1 : 0);
-  });
+  }
 }
 
 function testComplete(result) {

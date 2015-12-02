@@ -72,5 +72,5 @@ Run tests in a browser
 Run Saucelabs Tests In a Specific Browser
 ---
 
-	$ CLIENT="saucelabs:internet explorer:9" SAUCE_USERNAME=deltadb-orm-nosql
-	  SAUCE_ACCESS_KEY=6d3b9404-c3b5-4436-a377-f3d5fa3062c4 npm run browser-test
+	$ CLIENT="saucelabs:internet explorer:9" SAUCE_USERNAME=deltadb-orm-nosql-u
+	  SAUCE_ACCESS_KEY=98af9fa7-6fa1-48db-a53d-6d776e9d991c npm run browser-test

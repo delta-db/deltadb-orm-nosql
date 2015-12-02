@@ -8,6 +8,7 @@ var request = require('request'),
   Promise = require('bluebird');
 
 var Sauce = function (username, accessKey) {
+  this._username = username;
   this._sauceLabs = new SauceLabs({
     username: username,
     password: accessKey
@@ -20,8 +21,9 @@ Sauce.prototype.findJob = function (jobName) {
   // saucelabs package doesn't support the full option for getJobs and we don't want to have to make
   // an API call for each job to determine whether the job name matches so we will execute this GET
   // request manually.
+  var self = this;
   return new Promise(function (resolve, reject) {
-    var url = 'https://saucelabs.com/rest/v1/deltadb-common-utils/jobs?full=true';
+    var url = 'https://saucelabs.com/rest/v1/' + self._username + '/jobs?full=true';
     request(url, function (err, res, body) {
       if (err) {
         reject(err);

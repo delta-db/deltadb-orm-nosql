@@ -54,6 +54,11 @@ var DB = function () {
 
 inherits(DB, CommonDB);
 
+// The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a little
+// bit before destroying/opening the DB to make sure that we don't get any blocking errors from
+// transactions that have yet to complete.
+DB._SLEEP_MS = 300;
+
 DB.prototype._setDB = function (request) {
   this._db = request.result;
   this._version = parseInt(this._db.version);
@@ -313,23 +318,44 @@ DB.prototype._closeDestroyUnregister = function () {
   }).then(function () {
     return self._adapter._unregister(self._name);
   }).then(function () {
-    // The Safari IndexedDB implementation still has some bugs and we need to sleep for a little bit
-    // to make sure that we don't get any blocking errors when we open a DB immediately after
-    // deleting one.
-    return utils.timeout(100);
+    // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a
+    // little bit to make sure that we don't get any blocking errors when we open a DB immediately
+    // after deleting one.
+    return utils.timeout(DB._SLEEP_MS);
   });
 };
 
 DB.prototype.destroy = function () {
   var self = this;
-  // We wait for the store to be loaded before closing the store as we wait for this same event when
-  // creating a store and we don't want to try to close a store before we have opened it.
-  return self._loaded.then(function () {
+  // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a little
+  // bit before destroying the DB to make sure that we don't get any blocking errors from
+  // transactions that have yet to complete.
+  return utils.timeout(DB._SLEEP_MS).then(function () {
+    // We wait for the store to be loaded before closing the store as we wait for this same event
+    // when creating a store and we don't want to try to close a store before we have opened it.
+    return self._loaded;
+  }).then(function () {
     return self._openClose(function () {
       return self._closeDestroyUnregister();
     });
   });
 };
+//
+// DB.prototype.destroy = function () {
+//   var self = this;
+//   // We wait for the store to be loaded before closing the store as we wait for this same event when
+//   // creating a store and we don't want to try to close a store before we have opened it.
+//   return self._loaded.then(function () {
+//     return self._openClose(function () {
+//       // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a
+//       // little bit before destroying the DB to make sure that we don't get any blocking errors from
+//       // transactions that have yet to complete.
+//       return utils.timeout(DB._SLEEP_MS).then(function () {
+//         return self._closeDestroyUnregister();
+//       });
+//     });
+//   });
+// };
 
 DB.prototype._closeDBAndDestroyCol = function (colName) {
   // Handle the destroying at the DB layer as we need to first close and then reopen the DB before
