@@ -111,7 +111,7 @@ describe('indexed-db custom', function () {
       return db.destroy().then(function () {
         idb = new IDB(); // Simulate a fresh instance during an initial load
         db = idb.db({
-          db: 'mydb'
+          db: db._name
         });
         return commonUtils.once(db, 'load'); // wait for data to load
       }).then(function () {

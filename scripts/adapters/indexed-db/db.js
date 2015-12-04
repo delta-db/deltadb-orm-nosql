@@ -39,6 +39,7 @@ if (global.window && !idbUtils.indexedDB()) { // in browser and no IndexedDB sup
  *   queued before the initial open
  */
 var DB = function () {
+
   CommonDB.apply(this, arguments); // apply parent constructor
   this._cols = {};
   this._pendingObjectStores = [];
@@ -54,13 +55,12 @@ var DB = function () {
 
 inherits(DB, CommonDB);
 
-// TODO: use browser detection to set to 0 when not Safari or IE
-// The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a little
-// bit before destroying/opening the DB to make sure that we don't get any blocking errors from
-// transactions that have yet to complete.
-// DB._SLEEP_MS = 2000; // Edge - NOT WORKING
-DB._SLEEP_MS = 700; // IE
-// DB._SLEEP_MS = 300; // Safari
+// TODO: use browser detection to set to 0 when not Safari or IE The Safari/IE IndexedDB
+// implementations still have some bugs and we need to sleep for a little bit before
+// destroying/opening the DB to make sure that we don't get any blocking errors from transactions
+// that have yet to complete. IE and Safari still have a long way to go when it comes to fully
+// implementing IndexedDB: http://w3c.github.io/test-results/IndexedDB/all.html
+DB._SLEEP_MS = 400;
 
 DB.prototype._setDB = function (request) {
   this._db = request.result;
@@ -96,7 +96,7 @@ DB.prototype._open = function (onUpgradeNeeded, onSuccess) {
       self._processQueue();
     };
 
-    // TODO: how to test onerror as FF doesn't call onerror for VersionError?
+    // TODO: fake indexedDB to unit test
     /* istanbul ignore next */
     request.onerror = function () {
       reject(request.error);
@@ -287,7 +287,15 @@ DB.prototype._openClose = function (promise) {
   });
 };
 
-DB.prototype._destroy = function () {
+// We need to retry when deleting the DB in browsers like IE. We serialize all our transactions and
+// if these browsers implemented the IndexedDB spec properly, the onsuccess method for our
+// transactions would only be called after the transactions have completed. Unfortunately, this is
+// not the case so we may need to make several attempts to destroy the database as we have no
+// reliable way to determine that the transactions have completed.
+DB.MAX_DESTROY_RETRIES = 5;
+DB.DESTROY_RETRY_SLEEP_MS = 500;
+
+DB.prototype._destroy = function (retries) {
   var self = this;
   return new Promise(function (resolve, reject) {
 
@@ -297,17 +305,25 @@ DB.prototype._destroy = function () {
       resolve();
     };
 
-    // TODO: how to trigger this for testing?
+    // TODO: fake indexedDB to unit test
     /* istanbul ignore next */
     req.onerror = function () {
       reject(new Error("Couldn't destroy database " + self._name + ": " + req.err));
     };
 
-    // TODO: how to trigger this for testing?
+    // TODO: fake indexedDB to unit test
     /* istanbul ignore next */
     req.onblocked = function () {
-      reject(new Error("Couldn't destroy database " + self._name + " as blocked: err=" +
-        req.err));
+      retries = retries ? retries : 0;
+      if (retries <= DB.MAX_DESTROY_RETRIES) { // Retry?
+        var promise = utils.timeout(DB.DESTROY_RETRY_SLEEP_MS).then(function () {
+          return self._destroy(retries + 1);
+        });
+        resolve(promise);
+      } else {
+        reject(new Error("Couldn't destroy database " + self._name + " as blocked: err=" +
+          req.err));
+      }
     };
   });
 };
@@ -320,23 +336,19 @@ DB.prototype._closeDestroyUnregister = function () {
     return self._destroy();
   }).then(function () {
     return self._adapter._unregister(self._name);
-  }).then(function () {
-    // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a
-    // little bit to make sure that we don't get any blocking errors when we open a DB immediately
-    // after deleting one.
-    return utils.timeout(DB._SLEEP_MS);
   });
 };
 
 DB.prototype.destroy = function () {
   var self = this;
-  // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a little
-  // bit before destroying the DB to make sure that we don't get any blocking errors from
-  // transactions that have yet to complete.
-  return utils.timeout(DB._SLEEP_MS).then(function () {
-    // We wait for the store to be loaded before closing the store as we wait for this same event
-    // when creating a store and we don't want to try to close a store before we have opened it.
-    return self._loaded;
+  // We wait for the store to be loaded before closing the store as we wait for this same event
+  // when creating a store and we don't want to try to close a store before we have opened it.
+  return self._loaded.then(function () {
+    // The Safari/IE IndexedDB implementations still have some bugs and we need to sleep for a
+    // little bit before destroying the DB to try to avoid generating blocking errors from
+    // transactions that have yet to complete. In IE, if we generate these errors "too early" then
+    // IE cannot recover.
+    return utils.timeout(DB._SLEEP_MS);
   }).then(function () {
     return self._openClose(function () {
       return self._closeDestroyUnregister();

@@ -135,7 +135,7 @@ Adapter.prototype.test = function () {
 
     it('should retrieve existing db', function () {
       var db2 = adapter.db({
-        db: 'mydb'
+        db: db._name // use same DB name
       });
       db2.should.eql(db);
     });
