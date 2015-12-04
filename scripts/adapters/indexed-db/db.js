@@ -60,7 +60,7 @@ inherits(DB, CommonDB);
 // destroying/opening the DB to make sure that we don't get any blocking errors from transactions
 // that have yet to complete. IE and Safari still have a long way to go when it comes to fully
 // implementing IndexedDB: http://w3c.github.io/test-results/IndexedDB/all.html
-DB._SLEEP_MS = 300;
+DB._SLEEP_MS = 400;
 
 DB.prototype._setDB = function (request) {
   this._db = request.result;
