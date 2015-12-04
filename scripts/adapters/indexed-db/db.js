@@ -96,7 +96,7 @@ DB.prototype._open = function (onUpgradeNeeded, onSuccess) {
       self._processQueue();
     };
 
-    // TODO: how to test onerror as FF doesn't call onerror for VersionError?
+    // TODO: fake indexedDB to unit test
     /* istanbul ignore next */
     request.onerror = function () {
       reject(request.error);
@@ -299,23 +299,22 @@ DB.prototype._destroy = function (retries) {
   var self = this;
   return new Promise(function (resolve, reject) {
 
-    retries = retries ? retries : 0;
-
     var req = idbUtils.indexedDB().deleteDatabase(self._name);
 
     req.onsuccess = function () {
       resolve();
     };
 
-    // TODO: how to trigger this for testing?
+    // TODO: fake indexedDB to unit test
     /* istanbul ignore next */
     req.onerror = function () {
       reject(new Error("Couldn't destroy database " + self._name + ": " + req.err));
     };
 
-    // TODO: how to trigger this for testing?
+    // TODO: fake indexedDB to unit test
     /* istanbul ignore next */
     req.onblocked = function () {
+      retries = retries ? retries : 0;
       if (retries <= DB.MAX_DESTROY_RETRIES) { // Retry?
         var promise = utils.timeout(DB.DESTROY_RETRY_SLEEP_MS).then(function () {
           return self._destroy(retries + 1);
