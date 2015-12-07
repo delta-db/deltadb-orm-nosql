@@ -1,0 +1,78 @@
+<script>
+
+var idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+
+// Generate a unique db name as IndexedDB is very delicate and we want our test to focus on a new DB
+var dbName = 'mydb' + '_' + (new Date()).getTime() + '_' + Math.round(1000000*Math.random());
+
+var db = null;
+
+var version = 1;
+
+var open = function (version, onSuccess, onUpgradeNeeded) {
+
+  var request = null;
+
+  if (version) {
+    request = idb.open(dbName, version);
+  } else { // 1st time opening?
+    request = idb.open(dbName);
+  }
+
+  request.onupgradeneeded = function () {
+    if (onUpgradeNeeded) {
+      onUpgradeNeeded(request);
+    }
+  };
+
+  request.onsuccess = function () {
+    db = request.result;
+    if (onSuccess) {
+      onSuccess(request);
+    }
+  };
+
+  request.onerror = function () {
+    console.log('error=', request.error);
+    alert('error=' + JSON.stringify(request.error));
+  };
+
+};
+
+var createObjectStore = function (name, callback) {
+  db.close(); // synchronous
+  version++; // increment version to trigger onupgradeneeded
+  open(version, callback, function (request) {
+    request.result.createObjectStore(name, {
+      keyPath: 'id'
+    });
+  });
+};
+
+// // NOTE: we could create the first store when opening the DB for the first time, but we'll keep
+// // things simple and reuse our createObjectStore code for both object stores
+// open(null, function () {
+//   createObjectStore('store1', function () {
+//     createObjectStore('store2', function () {
+//       console.log('done creating both stores');
+//     });
+//   });
+// });
+
+open(null, function () {
+  db.close(); // synchronous
+  version++; // increment version to trigger onupgradeneeded
+  open(version, function () {
+    console.log('done creating both stores');
+  }, function (request) {
+    request.result.createObjectStore('store1', {
+      keyPath: 'id'
+    });
+
+    request.result.createObjectStore('store2', {
+      keyPath: 'id'
+    });
+  });
+});
+
+</script>
