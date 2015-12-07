@@ -6,10 +6,20 @@
 var Utils = function () {};
 
 Utils.prototype.indexedDB = function () {
+  // The Safari implementation of IndexedDB has some serious issues such as the fact that fact that
+  // you cannot create object stores in separate transactions, which means that you cannot create
+  // object stores dynamically: http://stackoverflow.com/questions/34124846
+  var isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf(
+    'Chrome') === -1;
+
   // TODO: fake window.indexedDB, etc... and remove the ignore statement below
   /* istanbul ignore next */
-  return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB ||
-    window.shimIndexedDB;
+  if (isSafari) {
+    return window.shimIndexedDB;
+  } else {
+    return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB ||
+      window.msIndexedDB || window.shimIndexedDB;
+  }
 };
 
 module.exports = new Utils();

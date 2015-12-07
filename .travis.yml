@@ -17,6 +17,9 @@ env:
   - COMMAND=browser-coverage-full-test
 
   # Saucelabs tests
+  #
+  # TODO: according to http://caniuse.com/#feat=sql-storage, android 4.1-4.3 should support WebSQL,
+  # but there appears to be some issues
   - CLIENT="saucelabs:firefox" COMMAND=browser-test
   - CLIENT="saucelabs:firefox:34" COMMAND=browser-test
   - CLIENT="saucelabs:chrome" COMMAND=browser-test

@@ -249,6 +249,27 @@ Adapter.prototype.test = function () {
       });
     });
 
+    it('should simulatenously create docs in different collections', function () {
+      // The Safari implementation of IndexedDB has some serious issues such as the fact that fact
+      // that you cannot create object stores in separate transactions, which means that you cannot
+      // create object stores dynamically: http://stackoverflow.com/questions/34124846. This test
+      // covers this condition.
+
+      var tasks = db.col('tasks'),
+        tags = db.col('tags'),
+        promises = [];
+
+      promises.push(tasks.doc({
+        thing: 'sing'
+      }).save());
+
+      promises.push(tags.doc({
+        text: 'personal'
+      }).save());
+
+      return Promise.all(promises);
+    });
+
   });
 
 };

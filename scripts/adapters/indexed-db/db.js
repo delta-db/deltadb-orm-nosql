@@ -11,13 +11,9 @@ var Promise = require('bluebird'),
   utils = require('deltadb-common-utils'),
   idbUtils = require('./utils');
 
-// Ignore the next line as we only want to execute it if IndexedDB is not supported and this depends
-// on the browser being used.
-/* istanbul ignore next */
-if (global.window && !idbUtils.indexedDB()) { // in browser and no IndexedDB support?
-  // Use a shim as phantomjs doesn't support indexedDB
-  require('indexeddbshim'); // Automatically sets window.shimIndexedDB
-}
+// Use a shim as phantomjs doesn't support IndexedDB and we need to simulate IndexedDB in Safari via
+// WebSQL
+require('indexeddbshim'); // Automatically sets window.shimIndexedDB
 
 /**
  * It appears that the IndexedDB spec takes some shortcuts. In order to create an object store, you
