@@ -13,7 +13,10 @@ var Promise = require('bluebird'),
 
 // Use a shim as phantomjs doesn't support IndexedDB and we need to simulate IndexedDB in Safari via
 // WebSQL
-require('indexeddbshim'); // Automatically sets window.shimIndexedDB
+/* istanbul ignore next */
+if (global.window) { // in browser?
+  require('indexeddbshim'); // Automatically sets window.shimIndexedDB
+}
 
 /**
  * It appears that the IndexedDB spec takes some shortcuts. In order to create an object store, you
