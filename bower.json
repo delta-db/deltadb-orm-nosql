@@ -1,6 +1,6 @@
 {
   "name": "deltadb-orm-nosql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "NoSQL ORM",
   "main": "dist/deltadb-orm-nosql.min.js",
   "homepage": "https://github.com/delta-db/deltadb-orm-nosql",
