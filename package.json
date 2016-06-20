@@ -57,7 +57,7 @@
     "coveralls": "^2.11.6",
     "es5-shim": "^4.4.0",
     "http-server": "^0.8.5",
-    "istanbul": "^0.4.0",
+    "istanbul": "^0.4.4",
     "jshint": "^2.8.0",
     "mocha": "^2.3.4",
     "mocha-phantomjs": "^4.0.1",
