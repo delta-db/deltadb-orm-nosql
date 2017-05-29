@@ -45,7 +45,7 @@
     "bluebird": "^3.0.5",
     "deltadb-common-utils": "0.0.4",
     "events": "^1.1.0",
-    "indexeddbshim": "^2.2.1",
+    "indexeddbshim": "^3.0.0",
     "inherits": "^2.0.1"
   },
   "devDependencies": {
